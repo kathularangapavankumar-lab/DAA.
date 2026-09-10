@@ -1,75 +1,56 @@
 #include <iostream>
+#include <vector>
 #include <climits>
 using namespace std;
 
-// Function to print the optimal parenthesization
-void printOptimal(int s[][100], int i, int j) {
-    if (i == j) {
-        cout << "A" << i;
-        return;
-    }
+int matrixChainMultiplication(vector<int>& p, int n)
+{
+    // dp[i][j] = minimum cost to multiply matrices Ai to Aj
+    vector<vector<int>> dp(n, vector<int>(n, 0));
 
-    cout << "(";
-
-    printOptimal(s, i, s[i][j]);
-    printOptimal(s, s[i][j] + 1, j);
-
-    cout << ")";
-}
-
-int main() {
-    int n;
-
-    cout << "Enter number of matrices: ";
-    cin >> n;
-
-    int p[100];
-
-    cout << "Enter dimensions:\n";
-    cout << "For " << n << " matrices, enter " << n + 1 << " dimensions:\n";
-
-    for (int i = 0; i <= n; i++) {
-        cin >> p[i];
-    }
-
-    int m[100][100];
-    int s[100][100];
-
-    // Initialize diagonal elements
-    for (int i = 1; i <= n; i++) {
-        m[i][i] = 0;
-    }
-
-    // Chain length
-    for (int length = 2; length <= n; length++) {
-
-        for (int i = 1; i <= n - length + 1; i++) {
-
+    // length is the number of matrices in the chain
+    for (int length = 2; length < n; length++)
+    {
+        for (int i = 1; i < n - length + 1; i++)
+        {
             int j = i + length - 1;
 
-            m[i][j] = INT_MAX;
+            dp[i][j] = INT_MAX;
 
-            // Find minimum cost
-            for (int k = i; k < j; k++) {
-
-                int cost = m[i][k]
-                         + m[k + 1][j]
+            // Try every possible splitting point
+            for (int k = i; k < j; k++)
+            {
+                int cost = dp[i][k]
+                         + dp[k + 1][j]
                          + p[i - 1] * p[k] * p[j];
 
-                if (cost < m[i][j]) {
-                    m[i][j] = cost;
-                    s[i][j] = k;
+                if (cost < dp[i][j])
+                {
+                    dp[i][j] = cost;
                 }
             }
         }
     }
 
-    cout << "\nMinimum number of scalar multiplications = "
-         << m[1][n] << endl;
+    return dp[1][n - 1];
+}
 
-    cout << "Optimal Parenthesization = ";
-    printOptimal(s, 1, n);
-    cout << endl;
+int main()
+{
+    // Matrices:
+    // A1 = 10 x 20
+    // A2 = 20 x 30
+    // A3 = 30 x 40
+    // A4 = 40 x 30
+
+    vector<int> dimensions = {10, 20, 30, 40, 30};
+
+    int n = dimensions.size();
+
+    int result = matrixChainMultiplication(dimensions, n);
+
+    cout << "Minimum number of scalar multiplications: "
+         << result << endl;
 
     return 0;
 }
